@@ -12,12 +12,17 @@ concurrency = 5
 debug = True
 
 # mysql
-HOST = '127.0.0.1'
-PORT = '3306'
-DATABASE = 'vulhub'
-USERNAME = 'root'
-PASSWORD = '123456'
-SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://{}:{}@{}:{}/{}'.format(USERNAME,PASSWORD,HOST,PORT,DATABASE)
+MHOST = '127.0.0.1'
+MPORT = '3306'
+MDATABASE = 'vulhub'
+MUSERNAME = 'root'
+MPASSWORD = '123456'
+SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://{}:{}@{}:{}/{}'.format(MUSERNAME,MPASSWORD,MHOST,MPORT,MDATABASE)
+
+# redis
+RHOST = '127.0.0.1'
+RPORT = '6379'
+RPASSWORD = '123456'
 
 
 # AES encrypt
