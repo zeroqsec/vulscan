@@ -1,7 +1,7 @@
 import requests
 import random
 
-from common.utils import is_json
+from common.utils import isJson
 from log.log import getLogger
 
 logger = getLogger(__name__)
@@ -31,7 +31,7 @@ def requester(
         if method == 'GET':
             response = requests.get(url,headers=headers,timeout=timeout,params=data,
                          proxies=proxies,verify=verify,allow_redirects=allow_redirects)
-        if is_json(data):
+        if isJson(data):
             response = requests.post(url, json=data, headers=headers, timeout=timeout,
                                      proxies=proxies, verify=verify, allow_redirects=allow_redirects)
         if method == 'POST':
