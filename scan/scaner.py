@@ -1,5 +1,6 @@
 import asyncio
 import time
+import os
 from functools import wraps
 from multiprocessing import Pool,Manager,Value
 
@@ -28,6 +29,7 @@ class Env:
     payloads = None
     taskStatus = Value("i",200)
     taskId = None
+    pocs = None
     kwargs = None
 
 
@@ -61,34 +63,42 @@ def processPool(fun,env):
     pool.join()
 
 
-def initEnv(url,method,encoding,vulname,payloadPath,output=vulResultPath,**kwargs):
-    logger.debug("%s {} environment is in process of initialization".format(vulname) % run)
-    time.sleep(1)
-    logger.debug("%s {} vul test url:{}".format(vulname,url) % good)
-    logger.debug("%s {} paylaods load path:{}".format(vulname,payloadPath) % good)
-    output = "{}\\{}Report.txt".format(output,vulname)
-    logger.debug("%s {} report output path:{}".format(vulname, output) % good)
-    try:
-        manager = Manager()
-        payloadsQ = manager.Queue()
-        payloads = fileLoadPaylaod(payloadPath)
-        for p in payloads:
-            payloadsQ.put(p)
+def initEnv(url=None,urls=None,method=None,encoding=None,vulname=None,payloads=None
+            ,pocs=None,payloadPath=None,output=vulResultPath,**kwargs):
+    if vulname is not None:
+        logger.debug("%s {} environment is in process of initialization".format(vulname) % run)
         time.sleep(1)
-    except ValueError:
-        logger.error("%s queue is close" % bad)
-    logger.debug("%s {} payloads is loading.".format(vulname) % good)
-    time.sleep(1)
+    if url is not None:
+        logger.debug("%s {} vul test url:{}".format(vulname,urlHead(url,**kwargs)) % good)
+    elif urls is not None:
+        logger.debug("%s {} vul test urls:{} is loading.".format(vulname, os.path.basename(urls)) % good)
+    if payloads is not None:
+        logger.debug("%s {} paylaods load path:{}".format(vulname,payloadPath) % good)
+        try:
+            manager = Manager()
+            payloadsQ = manager.Queue()
+            payloads = fileLoadPaylaod(payloadPath)
+            for p in payloads:
+                payloadsQ.put(p)
+            time.sleep(1)
+            Env.payloads = payloadsQ
+        except ValueError:
+            logger.error("%s queue is close" % bad)
+        logger.debug("%s {} payloads is loading.".format(vulname) % good)
+        time.sleep(1)
+    if pocs is not None:
+        logger.debug("%s path:{},pocs is loading.".format(pocs) %good)
     Env.url = urlHead(url,**kwargs)
+    Env.urls = urls
     Env.method = method
     Env.encoding = encoding
     Env.vulname = vulname
     Env.payloadPath = payloadPath
     Env.reportPath = output
-    Env.payloads = payloadsQ
+    Env.pocs = pocs
     # task status set start
     Env.taskStatus.value = Task.START
-    Env.taskId = Value('i',lambda : int(round(time.time()* 1000*1000)))
+    Env.taskId = lambda : int(round(time.time()* 1000*1000))
     Env.kwargs = kwargs
     logger.debug("%s {} initialization of the environment is completed".format(vulname) % good)
 
@@ -97,11 +107,11 @@ def initEnv(url,method,encoding,vulname,payloadPath,output=vulResultPath,**kwarg
 
 
 if __name__ == "__main__":
-    Env = initEnv("www.baidu.com",
-         "GET",
-         "base64",
-         "xss",
-         xssPayloadPath,
+    Env = initEnv(url="www.baidu.com",
+         method="GET",
+         encoding="base64",
+         vulname="xss",
+         xssPayloadPath=xssPayloadPath,
          )
     from scan.plugins.xss import xssscan
     processPool(xssscan,Env)

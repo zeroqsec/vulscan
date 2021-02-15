@@ -6,4 +6,5 @@ logger = getLogger(__name__)
 
 @executeTask
 async def xssscan(env):
+    logger.debug("xss")
     pass
