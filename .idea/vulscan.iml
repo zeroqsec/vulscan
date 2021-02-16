@@ -6,6 +6,7 @@
     </content>
     <orderEntry type="jdk" jdkName="Python 3.9 (vulscan)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="项目" />
   </component>
   <component name="PyNamespacePackagesService">
     <option name="namespacePackageFolders">

@@ -105,14 +105,23 @@ def initEnv(url=None,urls=None,method=None,encoding=None,vulname=None,payloads=N
     return Env
 
 
+def xssScanApi(**kwargs):
+    Env = initEnv(**kwargs)
+    from scan.plugins.xss import xssScan
+    processPool(xssScan,Env)
+
+def sqlScanApi(**kwargs):
+    Env = initEnv(**kwargs)
+    from scan.plugins.sql import sqlScan
+    processPool(sqlScan,Env)
+
+def universqlScan(**kwargs):
+    Env = initEnv(**kwargs)
+    from scan.universal.detect.verify import verifyVul
+    processPool(verifyVul,Env)
+
 
 if __name__ == "__main__":
-    Env = initEnv(url="www.baidu.com",
-         method="GET",
-         encoding="base64",
-         vulname="xss",
-         xssPayloadPath=xssPayloadPath,
-         )
-    from scan.plugins.xss import xssscan
-    processPool(xssscan,Env)
+    xssScanApi()
+
 

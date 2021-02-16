@@ -5,6 +5,6 @@ from cores.colors import  red, white, bad, info,run,que,good
 logger = getLogger(__name__)
 
 @executeTask
-async def xssscan(env):
+async def xssScan(env):
     logger.debug("xss")
     pass

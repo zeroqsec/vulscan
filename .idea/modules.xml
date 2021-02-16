@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$USER_HOME$/Desktop/XSStrike-master/.idea/XSStrike-master.iml" filepath="$USER_HOME$/Desktop/XSStrike-master/.idea/XSStrike-master.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/vulscan.iml" filepath="$PROJECT_DIR$/.idea/vulscan.iml" />
+      <module fileurl="file://E:/项目/.idea/项目.iml" filepath="E:/项目/.idea/项目.iml" />
     </modules>
   </component>
 </project>

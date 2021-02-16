@@ -57,7 +57,7 @@ def randomStr(n):
     return ''.join(random.sample('zyxwvutsrqponmlkjihgfedcba',n))
 
 
-def verifyVul(url,vulname,taskId,timeout=5,proxies=None,verify=True):
+def verifyVul(url=None,vulname=None,taskId=None,timeout=5,proxies=None,verify=True):
     pocFile = "{}\{}".format(pocPath,vulname)
     Resolver = yamlResolver(pocFile)
     if Resolver.set is not None:
