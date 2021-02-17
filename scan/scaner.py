@@ -123,5 +123,6 @@ def universqlScan(**kwargs):
 
 if __name__ == "__main__":
     xssScanApi()
+    pass
 
 
