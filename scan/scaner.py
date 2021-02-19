@@ -60,6 +60,7 @@ def processPool(fun,env):
     '''
     pool = Pool(processes=processCount)
     logger.debug("%s start {} processes already.".format(processCount) % good)
+    time.sleep(1)
     for i in range(processCount):
         pool.apply_async(func=fun(env))
     pool.close()
@@ -69,28 +70,29 @@ def processPool(fun,env):
 def initEnv(url=None,urls=None,headers=None,proxy=None,taskid=None,method=None,encoding=None,vulname=None,payloads=None
             ,pocsPath=None,payloadPath=None,output=vulResultPath,**kwargs):
     env = Env()
+    manager = Manager()
     if vulname is not None:
         logger.debug("%s {} environment is in process of initialization".format(vulname) % run)
-        time.sleep(1)
     if url is not None:
         logger.debug("%s {} vul test url:{}".format(vulname,urlHead(url,**kwargs)) % good)
     elif urls is not None:
+        env.urls = manager.Queue()
+        env.urls = urls
         logger.debug("%s {} vul test urls:{} is loading.".format(vulname, os.path.basename(urls)) % good)
     if payloads is not None:
         logger.debug("%s {} paylaods load path:{}".format(vulname,payloadPath) % good)
         try:
-            manager = Manager()
             payloadsQ = manager.Queue()
             payloads = fileLoadPaylaod(payloadPath)
             for p in payloads:
                 payloadsQ.put(p)
-            time.sleep(1)
             env.payloads = payloadsQ
         except ValueError:
             logger.error("%s queue is close" % bad)
         logger.debug("%s {} payloads is loading.".format(vulname) % good)
         time.sleep(1)
     if pocsPath is not None:
+        env.pocs = manager.Queue()
         env.pocs = getPathFiles(pocsPath)
         logger.debug("%s path:{},pocs is loading.".format(pocsPath) %good)
     env.url = urlHead(url,**kwargs)

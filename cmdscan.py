@@ -1,5 +1,6 @@
 import argparse
 import sys
+import time
 from config.config import timeout,processCount,delay,concurrency,vulResultPath,pocPath
 from cores.colors import end, red, white, bad, info,yellow,green
 from log.log import getLogger
@@ -8,6 +9,7 @@ logger = getLogger(__name__)
 
 print('''%s\tVulScan %sv1.0
 %s''' % (red, white, end))
+time.sleep(1)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-u', '--url', help='url', dest='target')
@@ -31,7 +33,6 @@ parser.add_argument('-d', '--delay', help='delay between requests',
 parser.add_argument('-r','--report',help = 'report of vul scan',default=vulResultPath,dest='reportPath')
 
 args = parser.parse_args()
-print(args)
 
 data = args.paramData
 encode = args.encode
@@ -50,7 +51,8 @@ if args.target == None:
         targets = args.targets
     else:
         logger.debug("%s No parameter of (url|urls)" % bad)
-        #sys.exit()
+        time.sleep(1)
+        sys.exit()
 else:
     target = args.target
 
@@ -63,12 +65,12 @@ try:
 except NameError as e:
     targets = None
 
-import time
-from scan.scaner import xssScanApi,sqlScanApi,universScanApi,initEnv
-from scan.universal.detect.verify import verifyVul
+
+from scan.scaner import xssScanApi,sqlScanApi,universScanApi,initEnv,processPool
+from scan.universal.detect.verify import verifyAllVuls
 if __name__ == '__main__':
     taskid = lambda : int(round(time.time()* 1000*1000))
-    env = initEnv(
+    env_u = initEnv(
         url = target,
         urls = targets,
         encoding= encode,
@@ -78,6 +80,9 @@ if __name__ == '__main__':
         proxy = proxy,
         taskid = taskid
     )
+    processPool(verifyAllVuls,env_u)
+
+
 
 
 

@@ -89,6 +89,9 @@ def verifyVul(url=None,vulname=None,taskId=None,timeout=5,proxies=None,verify=Tr
         with open(resultSavaPath,mode='a',encoding='utf-8') as f:
             f.write("%s 任务:{},{} 存在:{},风险:{}\n".format(taskId,url,Resolver.vulname,Resolver.level) %good)
 
+async def verifyAllVuls(env):
+    if env.url is not None:
+        pass
 
 if __name__ == '__main__':
     reslut = verifyVul("http://127.0.0.1:8080/dom.php",'test.yaml',"141242141")
