@@ -33,7 +33,6 @@ class Env:
     kwargs = None
 
 
-
 def executeTask(f):
     '''
     execute coroutines
@@ -115,14 +114,9 @@ def sqlScanApi(**kwargs):
     from scan.plugins.sql import sqlScan
     processPool(sqlScan,Env)
 
-def universqlScan(**kwargs):
+def universScanApi(**kwargs):
     Env = initEnv(**kwargs)
     from scan.universal.detect.verify import verifyVul
     processPool(verifyVul,Env)
-
-
-if __name__ == "__main__":
-    xssScanApi()
-    pass
 
 

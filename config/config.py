@@ -30,5 +30,6 @@ from app.common.encrypt import generateKey,getIv
 key = generateKey(16)
 iv = getIv(key)
 
-
+timeout = 5
+delay = 1
 
