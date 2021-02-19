@@ -1,4 +1,4 @@
-
+import os
 def fileLoadPaylaod(filePath) -> list:
     '''
     load file and output file content as a list
@@ -8,3 +8,6 @@ def fileLoadPaylaod(filePath) -> list:
     with open(filePath,mode='r',encoding='utf-8') as f:
         return f.readlines()
 
+def getPathFiles(filePath) -> list:
+    for root,dirs,files in os.walk(filePath):
+        return files

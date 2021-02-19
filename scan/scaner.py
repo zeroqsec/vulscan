@@ -9,6 +9,7 @@ from common.utils import urlHead
 from cores.generate import fileLoadPaylaod
 from config.config import processCount,concurrency,xssPayloadPath,vulResultPath
 from cores.colors import  red, white, bad, info,run,que,good
+from cores.generate import getPathFiles
 logger = getLogger(__name__)
 
 
@@ -19,18 +20,21 @@ class Task:
     CONTINUE = 1
 
 class Env:
-    url = None
-    urls = None
-    method = None
-    encoding = None
-    vulname = None
-    payloadPath = None
-    reportPath = None
-    payloads = None
-    taskStatus = Value("i",200)
-    taskId = None
-    pocs = None
-    kwargs = None
+    def __init__(self):
+        self.url = None
+        self.urls = None
+        self.method = None
+        self.encoding = None
+        self.vulname = None
+        self.payloadPath = None
+        self.reportPath = None
+        self.payloads = None
+        self.taskStatus = Value("i",200)
+        self.taskId = None
+        self.pocs = None
+        self.kwargs = None
+        self.headers = None
+        self.proxy = None
 
 
 def executeTask(f):
@@ -62,8 +66,9 @@ def processPool(fun,env):
     pool.join()
 
 
-def initEnv(url=None,urls=None,method=None,encoding=None,vulname=None,payloads=None
-            ,pocs=None,payloadPath=None,output=vulResultPath,**kwargs):
+def initEnv(url=None,urls=None,headers=None,proxy=None,taskid=None,method=None,encoding=None,vulname=None,payloads=None
+            ,pocsPath=None,payloadPath=None,output=vulResultPath,**kwargs):
+    env = Env()
     if vulname is not None:
         logger.debug("%s {} environment is in process of initialization".format(vulname) % run)
         time.sleep(1)
@@ -80,43 +85,45 @@ def initEnv(url=None,urls=None,method=None,encoding=None,vulname=None,payloads=N
             for p in payloads:
                 payloadsQ.put(p)
             time.sleep(1)
-            Env.payloads = payloadsQ
+            env.payloads = payloadsQ
         except ValueError:
             logger.error("%s queue is close" % bad)
         logger.debug("%s {} payloads is loading.".format(vulname) % good)
         time.sleep(1)
-    if pocs is not None:
-        logger.debug("%s path:{},pocs is loading.".format(pocs) %good)
-    Env.url = urlHead(url,**kwargs)
-    Env.urls = urls
-    Env.method = method
-    Env.encoding = encoding
-    Env.vulname = vulname
-    Env.payloadPath = payloadPath
-    Env.reportPath = output
-    Env.pocs = pocs
+    if pocsPath is not None:
+        env.pocs = getPathFiles(pocsPath)
+        logger.debug("%s path:{},pocs is loading.".format(pocsPath) %good)
+    env.url = urlHead(url,**kwargs)
+    env.urls = urls
+    env.method = method
+    env.headers = headers
+    env.proxy = proxy
+    env.encoding = encoding
+    env.vulname = vulname
+    env.payloadPath = payloadPath
+    env.reportPath = output
     # task status set start
-    Env.taskStatus.value = Task.START
-    Env.taskId = lambda : int(round(time.time()* 1000*1000))
-    Env.kwargs = kwargs
+    env.taskStatus.value = Task.START
+    env.taskId = taskid
+    env.kwargs = kwargs
     logger.debug("%s {} initialization of the environment is completed".format(vulname) % good)
 
-    return Env
+    return env
 
 
 def xssScanApi(**kwargs):
-    Env = initEnv(**kwargs)
+    env = initEnv(**kwargs)
     from scan.plugins.xss import xssScan
-    processPool(xssScan,Env)
+    processPool(xssScan,env)
 
 def sqlScanApi(**kwargs):
-    Env = initEnv(**kwargs)
+    env = initEnv(**kwargs)
     from scan.plugins.sql import sqlScan
-    processPool(sqlScan,Env)
+    processPool(sqlScan,env)
 
 def universScanApi(**kwargs):
-    Env = initEnv(**kwargs)
+    env = initEnv(**kwargs)
     from scan.universal.detect.verify import verifyVul
-    processPool(verifyVul,Env)
+    processPool(verifyVul,env)
 
 

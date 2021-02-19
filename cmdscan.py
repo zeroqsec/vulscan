@@ -1,6 +1,6 @@
 import argparse
 import sys
-from config.config import timeout,processCount,delay,concurrency,vulResultPath
+from config.config import timeout,processCount,delay,concurrency,vulResultPath,pocPath
 from cores.colors import end, red, white, bad, info,yellow,green
 from log.log import getLogger
 
@@ -50,17 +50,34 @@ if args.target == None:
         targets = args.targets
     else:
         logger.debug("%s No parameter of (url|urls)" % bad)
-        sys.exit()
+        #sys.exit()
 else:
     target = args.target
 
-from scan.scaner import xssScanApi,sqlScanApi,universScanApi
+try:
+    target
+except NameError as e:
+    target = None
+try:
+    targets
+except NameError as e:
+    targets = None
+
+import time
+from scan.scaner import xssScanApi,sqlScanApi,universScanApi,initEnv
 from scan.universal.detect.verify import verifyVul
-if '__main__' == __name__:
-    # 通用漏洞扫描
-    pass
-    # 常规漏洞扫描
-    pass
+if __name__ == '__main__':
+    taskid = lambda : int(round(time.time()* 1000*1000))
+    env = initEnv(
+        url = target,
+        urls = targets,
+        encoding= encode,
+        pocs = pocPath,
+        output= reportPath,
+        headers = headers,
+        proxy = proxy,
+        taskid = taskid
+    )
 
 
 
