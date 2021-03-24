@@ -1,6 +1,6 @@
 set:
   r1: randomStr(5)
-vulname: PHP环境 XML外部实体注入漏洞（XXE）
+vulname: JBOSS 注入
 level: 高危
 description: |
   PHP环境 XML外部实体注入

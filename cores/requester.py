@@ -29,24 +29,23 @@ def requester(
 
     try:
         if method == 'GET':
-            response = requests.get(url,headers=headers,timeout=timeout,params=data,
+            return requests.get(url,headers=headers,timeout=timeout,params=data,
                          proxies=proxies,verify=verify,allow_redirects=allow_redirects)
         elif method == 'POST':
-            response = requests.post(url,data=data,headers=headers,timeout=timeout,
+            return requests.post(url,data=data,headers=headers,timeout=timeout,
                           proxies=proxies,verify=verify,allow_redirects=allow_redirects)
         elif method == 'HEAD':
-            response = requests.head(url, params=data, headers=headers, timeout=timeout,
+            return requests.head(url, params=data, headers=headers, timeout=timeout,
                                      proxies=proxies, verify=verify, allow_redirects=allow_redirects)
         elif method == 'PUT':
-            response = requests.put(url, data=data, headers=headers, timeout=timeout,
+            return requests.put(url, data=data, headers=headers, timeout=timeout,
                                      proxies=proxies, verify=verify, allow_redirects=allow_redirects)
         elif method == 'PATCH':
-            response = requests.patch(url, data=data, headers=headers, timeout=timeout,
+            return requests.patch(url, data=data, headers=headers, timeout=timeout,
                                     proxies=proxies, verify=verify, allow_redirects=allow_redirects)
         elif method == 'DELETE':
-            response = requests.delete(url, data=data, headers=headers, timeout=timeout,
+            return requests.delete(url, data=data, headers=headers, timeout=timeout,
                                       proxies=proxies, verify=verify, allow_redirects=allow_redirects)
     except Exception as e:
-        logger.error(e)
+        return None
 
-    return response

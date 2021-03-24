@@ -7,7 +7,6 @@ from multiprocessing import Pool,Manager,Value
 from log.log import getLogger
 from common.utils import urlHead
 from cores.generate import fileLoadPaylaod
-from config.config import processCount,concurrency,xssPayloadPath,vulResultPath
 from cores.colors import  red, white, bad, info,run,que,good
 from cores.generate import getPathFiles
 logger = getLogger(__name__)
@@ -22,7 +21,6 @@ class Task:
 class Env:
     def __init__(self):
         self.url = None
-        self.urls = None
         self.method = None
         self.encoding = None
         self.vulname = None
@@ -33,8 +31,12 @@ class Env:
         self.taskId = None
         self.pocs = None
         self.kwargs = None
+        self.timeout = None
         self.headers = None
-        self.proxy = None
+        self.proxies = None
+        self.process = None
+        self.coroutines = None
+        self.pocsPath = None
 
 
 def executeTask(f):
@@ -46,7 +48,7 @@ def executeTask(f):
     @wraps(f)
     def decorated(env):
         async def main():
-            tasks = [f(env) for i in range(concurrency)]
+            tasks = [f(env) for i in range(env.coroutines)]
             await asyncio.gather(*tasks)
         asyncio.run(main())
     return decorated
@@ -58,29 +60,25 @@ def processPool(fun,env):
     :param env: running env
     :return:
     '''
-    pool = Pool(processes=processCount)
-    logger.debug("%s start {} processes already.".format(processCount) % good)
+    pool = Pool(processes=env.process)
+    logger.debug("%s Start {} processes already.".format(env.process) % good)
     time.sleep(1)
-    for i in range(processCount):
+    for i in range(env.process):
         pool.apply_async(func=fun(env))
     pool.close()
     pool.join()
 
 
-def initEnv(url=None,urls=None,headers=None,proxy=None,taskid=None,method=None,encoding=None,vulname=None,payloads=None
-            ,pocsPath=None,payloadPath=None,output=vulResultPath,**kwargs):
+def initEnv(url=None,urls=None,taskid=None,method=None,encoding=None,vulname=None,payloads=None
+            ,pocsPath=None,proxy=None,timeout=None,payloadPath=None,output=None,processCount=None,coroutineCount=None,**kwargs):
     env = Env()
     manager = Manager()
     if vulname is not None:
-        logger.debug("%s {} environment is in process of initialization".format(vulname) % run)
+        logger.debug("%s environment is in process of initialization" % run)
     if url is not None:
-        logger.debug("%s {} vul test url:{}".format(vulname,urlHead(url,**kwargs)) % good)
-    elif urls is not None:
-        env.urls = manager.Queue()
-        env.urls = urls
-        logger.debug("%s {} vul test urls:{} is loading.".format(vulname, os.path.basename(urls)) % good)
+        logger.debug("%s Vul test url:{}".format(urlHead(url,**kwargs)) % good)
     if payloads is not None:
-        logger.debug("%s {} paylaods load path:{}".format(vulname,payloadPath) % good)
+        logger.debug("%s Paylaods load path:{}".format(payloadPath) % good)
         try:
             payloadsQ = manager.Queue()
             payloads = fileLoadPaylaod(payloadPath)
@@ -88,18 +86,19 @@ def initEnv(url=None,urls=None,headers=None,proxy=None,taskid=None,method=None,e
                 payloadsQ.put(p)
             env.payloads = payloadsQ
         except ValueError:
-            logger.error("%s queue is close" % bad)
+            logger.error("%s Queue is close" % bad)
         logger.debug("%s {} payloads is loading.".format(vulname) % good)
         time.sleep(1)
     if pocsPath is not None:
-        env.pocs = manager.Queue()
-        env.pocs = getPathFiles(pocsPath)
-        logger.debug("%s path:{},pocs is loading.".format(pocsPath) %good)
-    env.url = urlHead(url,**kwargs)
+        env.pocs = Manager().Queue()
+        pocsList = getPathFiles(pocsPath)
+        while len(pocsList) != 0:
+            env.pocs.put(pocsList.pop())
+        logger.debug("%s Path:{},pocs is loading.".format(pocsPath) %good)
+
+    env.url = urlHead(url,**kwargs) if url is not None else url
     env.urls = urls
     env.method = method
-    env.headers = headers
-    env.proxy = proxy
     env.encoding = encoding
     env.vulname = vulname
     env.payloadPath = payloadPath
@@ -107,10 +106,18 @@ def initEnv(url=None,urls=None,headers=None,proxy=None,taskid=None,method=None,e
     # task status set start
     env.taskStatus.value = Task.START
     env.taskId = taskid
+    env.proxies = proxy
+    env.process = processCount
+    env.coroutines = coroutineCount
+    env.timeout = timeout
+    env.pocsPath = pocsPath
     env.kwargs = kwargs
-    logger.debug("%s {} initialization of the environment is completed".format(vulname) % good)
+    logger.debug("%s Initialization of the environment is completed" % good)
 
     return env
+
+
+
 
 
 def xssScanApi(**kwargs):
