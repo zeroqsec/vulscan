@@ -59,7 +59,7 @@ from scan.scaner import initEnv,processPool
 from scan.universal.detect.verify import verifyAllVuls
 if __name__ == '__main__':
     print('''%s\tVulScan %sv1.0
-                    by hql
+                    by a,a,a
                     email:1113732380@qq.com%s''' % (red, green, end))
     time.sleep(1)
     taskid = int(round(time.time()* 1000*1000))
